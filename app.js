@@ -16,10 +16,6 @@ function jsload(filename) {
     vm.runInContext(fs.readFileSync(filename, 'utf8'), runtime);
 }
 
-runtime.print = function() {
-    console.log.apply(console, [].slice.apply(arguments));
-};
-
 var s = '' +
         'Object.prototype.__defineProperty__ = function(name, value, enumerable, removable, writable) {' +
         '    Object.defineProperty(this, name, {' +
@@ -30,6 +26,8 @@ var s = '' +
         '    });' +
         '};';
 
+vm.runInContext(s, runtime);
+
 runtime.snarf = function(filename) {
     if (arguments.length > 1) {
         console.log('snarf doest not support options');
@@ -38,7 +36,14 @@ runtime.snarf = function(filename) {
     return fs.readFileSync(filename, 'utf8');
 };
 
+runtime.print = function() {
+    console.log.apply(console, [].slice.apply(arguments));
+};
+
+s = 'print.__proto__ = Function;' +
+    'snarf.__proto__ = Function;';
 vm.runInContext(s, runtime);
+
 
 jsload('./jsdefs.js');
 jsload('./jsparse.js');
