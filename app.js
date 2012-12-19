@@ -4,6 +4,8 @@
 // conditional catch clause is a mozilla extension to js.
 // regex can not by called as function in v8, so change /regex/(input) into /regex/.exec(input)
 
+/*jshint node*/
+
 var fs = require('fs'),
     vm = require('vm'),
     util = require('util');
@@ -46,21 +48,20 @@ function canonicalize(script) {
     return script.replace(/(["'])/g, '\\$&').replace(/\n/g, '\\n');
 }
 
-function jseval(s) {
-    var script = '(evaluate("' + s + '", "anon.js", 1))';
-    var ret = vm.runInContext(script, runtime);
-    console.log('jseval: ', ret);
+function jsEval(s) {
+    var script = '(evaluate("' + canonicalize(s) + '", "anon.js", 1))';
+    return vm.runInContext(script, runtime);
 }
 
 function jsLoadAndEval(filename) {
-    jseval( canonicalize(fs.readFileSync(filename, 'utf8')) );
+    jsEval( fs.readFileSync(filename, 'utf8') );
 }
 
 // remove anonying tokenizer
 function sanitizeAST(ast) {
     if (ast && typeof ast == 'object') {
         if ('tokenizer' in ast) {
-            ast.tokenizer = {};
+            delete ast.tokenizer;
         }
 
         Object.keys(ast).forEach(function(sub) {
@@ -69,15 +70,38 @@ function sanitizeAST(ast) {
     }
 }
 
-function jsDumpAST(filename) {
-    var script = fs.readFileSync(filename, 'utf8');
+
+function jsDumpAST(script, filename) {
+    filename = filename || 'anonymous.js';
     script = 'parse("' + canonicalize(script) +  '", "' + filename + '", 1)';
-    // script = script.replace(/\n/g, '\\n');
     console.log('script: ', script);
     var ret = vm.runInContext(script, runtime);
     sanitizeAST(ret);
     console.log(util.inspect(ret, false, null));
 }
-jsDumpAST("test.js");
-jsLoadAndEval('test.js');
+
+function jsLoadAndDumpAST(filename) {
+    var script = fs.readFileSync(filename, 'utf8');
+    jsDumpAST(script, filename);
+}
+
+if (process.argv.length <= 2) {
+    var source = '';
+    process.stdin.resume();
+    process.stdin.setEncoding('utf8');
+    process.stdin.on('data', function(data) {
+        source += data;
+    })
+    process.stdin.on('end', function() {
+        if (process.env.NODE_DEBUG) {
+            jsDumpAST(source);
+        }
+        console.log('eval: ', jsEval(source));
+    });
+} else {
+    if (process.env.NODE_DEBUG) {
+        jsLoadAndDumpAST(process.argv[2]);
+    }
+    jsLoadAndEval(process.argv[2]);
+}
 
