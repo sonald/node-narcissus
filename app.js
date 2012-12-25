@@ -17,7 +17,7 @@ function jsload(filename) {
 }
 
 var s = '' +
-        'Object.prototype.__defineProperty__ = function(name, value, enumerable, removable, writable) {' +
+        'Object.prototype.__defineProperty__ = function(name, value, enumerable, writable, removable) {' +
         '    Object.defineProperty(this, name, {' +
         '        value: value,' +
         '        writable: writable || false,' +
@@ -37,7 +37,10 @@ runtime.snarf = function(filename) {
 };
 
 runtime.print = function() {
-    console.log.apply(console, [].slice.apply(arguments));
+    var args = [].slice.apply(arguments).map(function(arg) {
+        return util.inspect(arg, false, 3);
+    });
+    console.log.apply(console, args);
 };
 
 s = 'print.__proto__ = Function;' +

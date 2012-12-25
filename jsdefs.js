@@ -159,7 +159,7 @@ for (var i = 0, j = tokens.length; i < j; i++) {
     tokens[t] = i;
 }
 eval(consts + ";");
-print(consts);
+// print(consts);
 
 // Map assignment operators to their indexes in the tokens array.
 var assignOps = ['|', '^', '&', '<<', '>>', '>>>', '+', '-', '*', '/', '%'];

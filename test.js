@@ -1,14 +1,14 @@
-function foutIf() {}
+function Car(age) {
+    this.name = 'a';
+    print(this.name);
 
-if (1) {
-    function finIf() {}
-    print('in loop');
+    function firstName() {
+        //print(this);
+        //print(this.name);
+    }
+
+    firstName();
 }
 
-finBlock();
-
-function myf() {
-    return 42;
-}
-
-myf(13);
+//var car = new Car();
+var car = Car();

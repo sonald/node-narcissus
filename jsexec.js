@@ -75,6 +75,8 @@ var global = {
             if (e == THROW) {
                 x.result = x2.result;
                 throw e;
+            } else {
+                throw e;
             }
         } finally {
             ExecutionContext.current = x;
@@ -261,9 +263,8 @@ function execute(n, x) {
         for (i = 0, j = a.length; i < j; i++) {
             s = a[i].name;
             f = new FunctionObject(a[i], x.scope);
-            t.__defineProperty__(s, f, x.type != EVAL_CODE);
+            t.__defineProperty__(s, f, x.type != EVAL_CODE, true);
         }
-        //print('SCRIPT context: ', x.scope);
         a = n.varDecls;
         for (i = 0, j = a.length; i < j; i++) {
             u = a[i];
@@ -317,6 +318,8 @@ function execute(n, x) {
                             } catch (e) {
                                 if (e == BREAK && x.target == n) {
                                     break switch_loop;
+                                } else {
+                                    throw e;
                                 }
                             }
                         }
@@ -335,6 +338,8 @@ function execute(n, x) {
             } catch (e) {
                 if (e == BREAK && x.target == n) {
                     break;
+                } else {
+                    throw e;
                 }
             }
             n.update && getValue(execute(n.update, x));
@@ -348,6 +353,8 @@ function execute(n, x) {
                     break;
                 } else if (e == CONTINUE && x.target == n) {
                     continue;
+                } else {
+                    throw e;
                 }
             }
             n.update && getValue(execute(n.update, x));
@@ -372,6 +379,8 @@ function execute(n, x) {
                     break;
                 } else if (e == CONTINUE && x.target == n) {
                     continue;
+                } else {
+                    throw e;
                 }
             }
         }
@@ -384,6 +393,8 @@ function execute(n, x) {
                     break;
                 } else if (e == CONTINUE && x.target == n) {
                     continue;
+                } else {
+                    throw e;
                 }
             }
 
@@ -671,8 +682,7 @@ function execute(n, x) {
         }
 
         v = new Reference(s && s.object, n.value, n);
-        // print('find ' + n.value + ' in ' + JSON.stringify(s.object));
-        print('find ' + n.value + ' in ' + s.object);
+        // print('find ', n.value, ' in ', s.object);
     } else if (n.type == NUMBER || n.type == STRING || n.type == REGEXP) {
         v = n.value;
     } else if (n.type == GROUP) {
@@ -723,7 +733,6 @@ var FOp = FunctionObject.prototype = {
         try {
             execute(f.body, x2);
         } catch (e) {
-            print('catch e: ', e, x2.result);
             if (e == RETURN) {
                 return x2.result;
             } else if (e == THROW) {
