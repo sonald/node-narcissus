@@ -11,6 +11,7 @@ some modifications to jsexec.js and jsparse.js:
 1. add snarf , __defineProperty__ and print implementation. (see app.js)
 
 some semantics checking:
+
 1. 'this' value of inner function
 1. arguments are live links to function's position args
 1. strict mode semantic
